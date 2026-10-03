@@ -6,6 +6,10 @@ A modular **Pandas** pipeline that turns 2 years of daily stock prices for 10 ti
 
 ---
 
+## Live Dashboard
+
+You can view the interactive stock analytics dashboard here: **[View Live Dashboard](https://reenmayee.github.io/fam-task/)**
+
 ## Overview
 
 | | |
