@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Monthly Stock Indicators – Assignment Walkthrough</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#f4efe6;--card:#faf7f0;--ink:#2f2a24;--muted:#81786b;--line:#e2d9c8;--olive:#6b7a4f;--umber:#8a5a3b;--rose:#b07a6a;--ochre:#b8903f;--plum:#7d6477}
+@media(prefers-color-scheme:dark){:root{--paper:#2a2621;--card:#332e28;--ink:#efe8da;--muted:#a69d8d;--line:#4a433a;--olive:#a3b37f;--umber:#d09a76;--rose:#d4a090;--ochre:#d8b565;--plum:#b79bb0}}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:64px}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.65 'DM Sans',system-ui,sans-serif}
+h1,h2,h3{font-family:'Fraunces',Georgia,serif;font-weight:600;line-height:1.2;margin:0}
+code,.fn{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.86em;background:rgba(138,90,59,.1);padding:1px 6px;border-radius:4px}
+nav{position:sticky;top:0;z-index:5;background:var(--paper);border-bottom:1px solid var(--line);display:flex;gap:22px;padding:14px max(20px,calc((100% - 960px)/2));overflow-x:auto;font-size:.92rem}
+nav a{color:var(--muted);text-decoration:none;white-space:nowrap}nav a:hover{color:var(--ink)}
+main{max-width:960px;margin:0 auto;padding:0 20px 80px}
+header{padding:72px 0 36px}
+header h1{font-size:clamp(2rem,5vw,3.2rem);max-width:15em}
+header p{color:var(--muted);max-width:40em;margin:16px 0 0;font-size:1.05rem}
+section{padding:44px 0 8px}
+section>h2{font-size:1.7rem;margin-bottom:6px}
+.sub{color:var(--muted);margin:0 0 24px;max-width:46em}
+.stats{display:flex;flex-wrap:wrap;gap:0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin-top:30px}
+.stats div{flex:1 1 150px;padding:16px 0}
+.stats b{display:block;font:600 2rem 'Fraunces',serif;color:var(--umber)}
+.stats span{color:var(--muted);font-size:.9rem}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:700px){.two{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:22px 24px}
+.card h3{font-size:1.15rem;margin-bottom:10px}
+.card ul{margin:0;padding-left:18px}.card li{margin:5px 0}
+.steps{display:grid;gap:12px}
+.step{display:grid;grid-template-columns:34px 1fr;gap:14px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 20px}
+.step .n{font:600 1.3rem 'Fraunces',serif;color:var(--olive)}
+.step h3{font-size:1.02rem}.step p{margin:4px 0 6px;color:var(--muted);font-size:.95rem}
+.fn{margin-right:6px;display:inline-block;margin-bottom:4px}
+.choice{display:grid;grid-template-columns:1fr auto;gap:6px 16px;padding:16px 0;border-bottom:1px solid var(--line)}
+.choice h3{font-size:1.02rem;font-family:'DM Sans',sans-serif;font-weight:500}
+.choice p{grid-column:1;margin:2px 0 0;color:var(--muted);font-size:.94rem}
+.tag{font-size:.82rem;color:var(--olive);align-self:start;white-space:nowrap}.tag.no{color:var(--muted)}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:500;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 22px}
+.chip{border:1px solid var(--line);background:var(--card);color:var(--ink);font:500 .98rem 'DM Sans',sans-serif;padding:8px 18px;border-radius:99px;cursor:pointer}
+.chip:hover{border-color:var(--olive)}.chip[aria-pressed=true]{background:var(--olive);border-color:var(--olive);color:var(--card)}
+.chip:focus-visible,button:focus-visible{outline:2px solid var(--umber);outline-offset:2px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:18px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 18px}
+.kpi b{display:block;font:600 1.5rem 'Fraunces',serif}.kpi span{color:var(--muted);font-size:.85rem}
+.note{border-left:3px solid var(--ochre);padding:6px 16px;margin:0 0 22px;color:var(--muted);font-size:.95rem}
+.chartbox{margin:0 0 22px}
+.chartbox h3{font-size:1.1rem}.chartbox p{margin:2px 0 8px;color:var(--muted);font-size:.93rem;max-width:46em}
+.plot{position:relative;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 6px 4px}
+.plot svg{width:100%;height:auto;display:block}
+.plot text{fill:var(--muted);font:11px 'DM Sans',sans-serif}
+.grid{stroke:var(--line);stroke-width:1}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--paper);font-size:.8rem;padding:8px 10px;border-radius:6px;display:none;line-height:1.5;white-space:nowrap;z-index:3}
+.legend{display:flex;flex-wrap:wrap;gap:4px 16px;padding:6px 12px 8px;font-size:.84rem;color:var(--muted)}
+.legend i{display:inline-block;width:16px;height:3px;margin-right:6px;vertical-align:middle;border-radius:2px}
+.scroll{overflow:auto;max-height:420px;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+.scroll table{font-size:.84rem;white-space:nowrap}.scroll th{position:sticky;top:0;background:var(--card)}
+.warn{background:var(--card);border:1px solid var(--ochre);border-radius:10px;padding:16px 20px;margin:20px 0}
+a{color:var(--umber)}
+footer{color:var(--muted);font-size:.88rem;padding-top:40px;border-top:1px solid var(--line);margin-top:50px}
+</style>
+</head>
+<body>
+<nav><a href="#brief">The assignment</a><a href="#build">What I built</a><a href="#architecture">Architecture</a><a href="#choices">Choices</a><a href="#output">Output explorer</a></nav>
+<main>
+<header>
+  <h1>Turning two years of daily stock prices into a monthly story</h1>
+  <p>A walkthrough of the Data Engineering intern assignment: what was asked, what was built, the decisions behind it, and the results for each stock. Everything below is read live from <code>main.py</code> and the files it produced.</p>
+  <div class="stats" id="stats"></div>
+</header>
+
+<div class="warn" id="warn" hidden>
+  <b>Could not load main.py automatically.</b> This happens when the page is opened straight from your computer. On GitHub Pages it works on its own. To preview locally, pick the file here: <input type="file" id="pick" accept=".py">
+</div>
+
+<section id="brief">
+  <h2>The assignment</h2>
+  <p class="sub">Daily prices arrive often, but analysts want a calmer monthly view. The task is to reshape the data and add indicators traders use.</p>
+  <div class="two">
+    <div class="card"><h3>What was given</h3><ul>
+      <li>One CSV with 2 years of daily prices for 10 tickers</li>
+      <li>Columns: <code>date, volume, open, high, low, close, adjclose, ticker</code></li>
+      <li>Tickers: AAPL, AMD, AMZN, AVGO, CSCO, MSFT, NFLX, PEP, TMUS, TSLA</li>
+      <li>Python with Pandas only, no technical-analysis libraries</li>
+    </ul></div>
+    <div class="card"><h3>What was asked for</h3><ul>
+      <li>Daily to monthly: open = first day, close = last day, high = max, low = min</li>
+      <li>SMA 10 &amp; 20, EMA 10 &amp; 20, Donchian channels, Bollinger bands, Z-score</li>
+      <li>All indicators based on monthly closing prices</li>
+      <li>10 files named <code>result_{SYMBOL}.csv</code>, 24 rows each</li>
+      <li>Modular code: calculation separate from file writing</li>
+    </ul></div>
+  </div>
+  <h3 style="margin:30px 0 8px">How it will be judged, and where each part lives</h3>
+  <table id="evalTable"></table>
+</section>
+
+<section id="build">
+  <h2>What I built</h2>
+  <p class="sub">A single script, <code>main.py</code>, that runs the whole journey from raw CSV to ten checked output files.</p>
+  <div class="two">
+    <div class="card"><h3>Calculated for every stock</h3><ul id="cols"></ul></div>
+    <div class="card"><h3>Safety checks built in</h3><ul>
+      <li>All expected columns and exactly the 10 expected tickers are present</li>
+      <li>No duplicate (ticker, date) rows</li>
+      <li>Each stock ends up with exactly 24 sorted, unique months</li>
+      <li>The files are re-opened after saving and checked again</li>
+    </ul></div>
+  </div>
+</section>
+
+<section id="architecture">
+  <h2>Architecture</h2>
+  <p class="sub">The script runs these steps in order. Each step is its own function so the maths never mixes with file writing.</p>
+  <div class="steps" id="steps"></div>
+</section>
+
+<section id="choices">
+  <h2>Choices and assumptions</h2>
+  <p class="sub">Where the brief left room, these are the calls I made. A tick means the matching code was found in <code>main.py</code>.</p>
+  <div id="choiceList"></div>
+</section>
+
+<section id="output">
+  <h2>Output explorer</h2>
+  <p class="sub">One file per stock, as requested. Pick a ticker to read its <code id="outPath"></code> file and see what the numbers look like.</p>
+  <div class="chips" id="chips"></div>
+  <div id="detail"></div>
+</section>
+
+<footer>This page contains no hard-coded results. It reads <code>main.py</code> for the setup (tickers, columns, steps, choices) and the CSVs in the output folder for the numbers.</footer>
+</main>
+
+<script>
+const $=s=>document.querySelector(s);
+let code='',cfg={};
+const C={close:'#2f2a24',sma10:'#6b7a4f',sma20:'#8a5a3b',ema10:'#b8903f',ema20:'#7d6477',up:'#b07a6a',low:'#6b7a4f'};
+
+async function boot(){
+  try{const r=await fetch('main.py?v='+Date.now());if(!r.ok)throw 0;code=await r.text();init()}
+  catch(e){$('#warn').hidden=false}
+}
+$('#pick').onchange=async e=>{code=await e.target.files[0].text();$('#warn').hidden=true;init()};
+
+const line=i=>code.slice(0,i).split('\n').length;
+const strVar=n=>(code.match(new RegExp(n+'\\s*=\\s*"([^"]+)"'))||[])[1];
+const setVar=n=>{const m=code.match(new RegExp(n+'\\s*=\\s*\\{([\\s\\S]*?)\\}'));return m?[...m[1].matchAll(/"([^"]+)"/g)].map(x=>x[1]).sort():[]};
+const listVar=n=>{const m=code.match(new RegExp(n+'\\s*=\\s*\\[([\\s\\S]*?)\\]'));return m?[...m[1].matchAll(/"([^"]+)"/g)].map(x=>x[1]):[]};
+
+const LAYMAN={
+1:'Reads the big daily CSV into a table.',
+2:'Makes sure the right columns and exactly the 10 expected stocks are there, before anything else happens.',
+3:'Turns text dates into real dates and sorts each stock in time order.',
+4:'Stops the run if the same stock has two rows for one day.',
+5:'Squeezes each month of daily rows into one row: first open, highest high, lowest low, last close.',
+6:'Adds the indicators: moving averages, Donchian channels, Bollinger bands and Z-score.',
+7:'Confirms each stock has exactly 24 clean, sorted months.',
+8:'Loops over the 10 stocks and runs the steps above on each one.',
+9:'Writes one CSV per stock into the output folder.',
+10:'Re-opens every saved file and checks the file names, 24 rows and column layout.',
+11:'The control room: calls everything above in order.'};
+
+function init(){
+  cfg.input=strVar('INPUT_FILE')||'data/stock_data.csv';
+  cfg.out=strVar('OUTPUT_DIR')||'output';
+  cfg.tickers=setVar('EXPECTED_TICKERS');
+  cfg.cols=listVar('required_columns');
+  const fns=[...code.matchAll(/^def (\w+)\(/gm)].map(m=>m[1]);
+  const checks=(code.match(/raise ValueError/g)||[]).length;
+  const ind=cfg.cols.filter(c=>!['date','open','high','low','close','ticker'].includes(c));
+
+  $('#stats').innerHTML=[[cfg.tickers.length,'stocks'],[fns.length,'functions'],[ind.length,'indicator columns'],[checks,'validation checks'],[code.split('\n').length,'lines in main.py']]
+    .map(([a,b])=>`<div><b>${a}</b><span>${b}</span></div>`).join('');
+
+  $('#cols').innerHTML=['Monthly open, high, low, close',...ind.map(c=>c.replace(/_/g,' '))].map(x=>`<li>${x}</li>`).join('');
+  $('#outPath').textContent=cfg.out+'/result_{TICKER}.csv';
+
+  const has=n=>fns.includes(n);
+  const ev=[['Logic accuracy','Monthly open/high/low/close','aggregate_monthly'],['Math implementation','SMA, EMA, bands, Z-score','calculate_indicators'],['Data partitioning','One file for each stock','process_all_tickers'],['Data partitioning','Writing the files','save_results'],['Vectorization','Rolling and resample, no outside libraries','sma_seeded_ema']];
+  $('#evalTable').innerHTML='<tr><th>Criterion</th><th>What it covers</th><th>Function</th></tr>'+ev.map(([a,b,f])=>`<tr><td>${a}</td><td>${b}</td><td><span class="fn">${f}</span> ${has(f)?'✓':''}</td></tr>`).join('');
+
+  // steps from banner comments
+  const banners=[...code.matchAll(/^# (\d+)\. ([A-Z0-9 ]+?)\s*$/gm)];
+  $('#steps').innerHTML=banners.map((m,i)=>{
+    const seg=code.slice(m.index,i+1<banners.length?banners[i+1].index:code.length);
+    const f=[...seg.matchAll(/^def (\w+)\(/gm)].map(x=>`<span class="fn">${x[1]}</span>`).join('');
+    const t=m[2].toLowerCase().replace(/^./,c=>c.toUpperCase());
+    return `<div class="step"><div class="n">${m[1]}</div><div><h3>${t}</h3><p>${LAYMAN[m[1]]||''}</p>${f}</div></div>`}).join('');
+
+  const CH=[
+   ['Month-end resampling','Daily rows are grouped by calendar month. Open is the first trading day, close the last, so they are snapshots rather than averages.',/resample\("ME"\)/],
+   ['EMA starts from an SMA','The first EMA value is the plain average of the first N closes, then each new month blends in the latest close. This follows the reference formula in the brief.',/def sma_seeded_ema/],
+   ['EMA smoothing factor','Multiplier = 2 / (N + 1), so recent months weigh more than old ones.',/2 \/ \(span \+ 1\)/],
+   ['Indicators on monthly data','Windows count months, not days. A 20-window needs 20 months of history.',/rolling\(20\)/],
+   ['Bollinger bands use k = 2','Middle line is the 20-month average, bands sit 2 standard deviations away. Pandas default (sample) standard deviation is used.',/2 \* rolling_std/],
+   ['Z-score shares the same window','Z = (close − 20-month mean) ÷ 20-month standard deviation, same inputs as Bollinger.',/Z_Score_20/],
+   ['Early months stay blank','Where there is not enough history, values are left empty instead of being guessed or filled.',/rolling\(10\)/],
+   ['Stop on bad data','Any failed check raises an error rather than quietly fixing the data, so a wrong result never gets saved.',/raise ValueError/]];
+  $('#choiceList').innerHTML=CH.map(([t,d,re])=>{const m=code.match(re);
+    return `<div class="choice"><h3>${t}</h3><span class="tag ${m?'':'no'}">${m?'✓ main.py line '+line(m.index):'not detected'}</span><p>${d}</p></div>`}).join('');
+
+  $('#chips').innerHTML=cfg.tickers.map(t=>`<button class="chip" aria-pressed="false" data-t="${t}">${t}</button>`).join('');
+  document.querySelectorAll('.chip').forEach(b=>b.onclick=()=>pick(b.dataset.t));
+  $('#detail').innerHTML='<p class="note">Choose a ticker above to load its file.</p>';
+  if(cfg.tickers.length)pick(cfg.tickers[0]);
+}
+
+function parseCSV(t){
+  const [h,...r]=t.trim().split(/\r?\n/);const hd=h.split(',');
+  return r.map(l=>{const v=l.split(',');const o={};hd.forEach((k,i)=>o[k]=k==='date'||k==='ticker'?v[i]:(v[i]===''||v[i]===undefined?null:parseFloat(v[i])));return o});
+}
+
+async function pick(t){
+  document.querySelectorAll('.chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.t===t));
+  const path=`${cfg.out}/result_${t}.csv`;
+  $('#detail').innerHTML='<p class="note">Loading '+path+'…</p>';
+  let rows;
+  try{const r=await fetch(path);if(!r.ok)throw 0;rows=parseCSV(await r.text())}
+  catch(e){$('#detail').innerHTML=`<p class="note">Could not read <code>${path}</code>. Run <code>main.py</code> and commit the <code>${cfg.out}</code> folder to the repo so this page can find it.</p>`;return}
+  render(t,rows,path);
+}
+
+const f2=v=>v==null?'–':v.toLocaleString(undefined,{maximumFractionDigits:2,minimumFractionDigits:2});
+function render(t,rows,path){
+  const L=rows.map(r=>r.date),g=k=>rows.map(r=>r[k]);
+  const last=rows[rows.length-1],first=rows[0];
+  const chg=(last.close/first.open-1)*100;
+  const z=last.Z_Score_20;
+  const zTxt=z==null?'not enough history':z>1?'above its recent norm':z<-1?'below its recent norm':'close to its recent norm';
+  const filled=rows.filter(r=>r.SMA_20!=null).length;
+  const hi=Math.max(...g('high')),lo=Math.min(...g('low'));
+  $('#detail').innerHTML=`
+  <div class="kpis">
+    <div class="kpi"><b>${rows.length}</b><span>monthly rows</span></div>
+    <div class="kpi"><b>${f2(last.close)}</b><span>last month-end close</span></div>
+    <div class="kpi"><b>${chg>=0?'+':''}${chg.toFixed(1)}%</b><span>first open to last close</span></div>
+    <div class="kpi"><b>${f2(hi)}</b><span>highest high</span></div>
+    <div class="kpi"><b>${f2(lo)}</b><span>lowest low</span></div>
+    <div class="kpi"><b>${z==null?'–':z.toFixed(2)}</b><span>Z-score: ${zTxt}</span></div>
+  </div>
+  <p class="note">Why are the early rows blank? A 20-month average needs 20 months of history, so in a 24-month file only the last ${filled} rows have the 20-month indicators. The 10-month ones start from month 10.</p>
+  <div class="chartbox"><h3>Price and moving averages</h3><p>The dark line is each month's closing price. Averages smooth out the zig-zags: price above them hints at an uptrend. EMAs react faster than SMAs because they favour recent months.</p><div class="plot" id="c1"></div></div>
+  <div class="chartbox"><h3>Bollinger bands</h3><p>A 20-month average with a shaded band 2 standard deviations either side. A wide band means a bumpy stretch. Price near an edge is unusually high or low compared with recent history.</p><div class="plot" id="c2"></div></div>
+  <div class="chartbox"><h3>Donchian channel</h3><p>The highest high and lowest low of the past 20 months. It shows the range the price has been living in. Leaving the range is often read as a strong move.</p><div class="plot" id="c3"></div></div>
+  <div class="chartbox"><h3>Z-score</h3><p>How far the close is from its 20-month average, in units of normal wobble. Zero is average, and beyond ±2 is rare.</p><div class="plot" id="c4"></div></div>
+  <h3 style="margin:28px 0 10px">The ${rows.length} rows in <code>${path}</code></h3>
+  <div class="scroll"><table><tr>${Object.keys(rows[0]).map(k=>`<th>${k}</th>`).join('')}</tr>
+  ${rows.map(r=>'<tr>'+Object.entries(r).map(([k,v])=>`<td>${k==='date'||k==='ticker'?v:f2(v)}</td>`).join('')+'</tr>').join('')}</table></div>
+  <p style="margin-top:10px"><a href="${path}" download>Download ${path.split('/').pop()}</a></p>`;
+
+  chart('c1',L,[{n:'Close',d:g('close'),c:C.close,w:2.4},{n:'SMA 10',d:g('SMA_10'),c:C.sma10},{n:'SMA 20',d:g('SMA_20'),c:C.sma20},{n:'EMA 10',d:g('EMA_10'),c:C.ema10,dash:'5 4'},{n:'EMA 20',d:g('EMA_20'),c:C.ema20,dash:'5 4'}]);
+  chart('c2',L,[{n:'Upper',d:g('BB_Upper_20'),c:C.up},{n:'Middle',d:g('BB_Middle_20'),c:C.muted||'#81786b',dash:'4 4'},{n:'Lower',d:g('BB_Lower_20'),c:C.low},{n:'Close',d:g('close'),c:C.close,w:2.4}],[0,2]);
+  chart('c3',L,[{n:'High 20',d:g('Donchian_High_20'),c:C.up},{n:'Low 20',d:g('Donchian_Low_20'),c:C.low},{n:'Close',d:g('close'),c:C.close,w:2.4}],[0,1]);
+  chart('c4',L,[{n:'Z-score',d:g('Z_Score_20'),c:C.sma20,w:2.4}],null,[-2,0,2]);
+}
+
+function chart(id,labels,S,band,refs=[]){
+  const el=document.getElementById(id),W=720,H=250,p={l:46,r:14,t:12,b:26},n=labels.length;
+  const vals=S.flatMap(s=>s.d).concat(refs).filter(v=>v!=null);
+  if(!vals.length){el.innerHTML='<p class="note" style="margin:10px">No values yet for this chart.</p>';return}
+  let lo=Math.min(...vals),hi=Math.max(...vals);const pad=(hi-lo)*.07||1;lo-=pad;hi+=pad;
+  const x=i=>p.l+i*(W-p.l-p.r)/(n-1),y=v=>p.t+(hi-v)*(H-p.t-p.b)/(hi-lo);
+  let g='';
+  for(let k=0;k<=4;k++){const v=lo+(hi-lo)*k/4;g+=`<line class="grid" x1="${p.l}" x2="${W-p.r}" y1="${y(v)}" y2="${y(v)}"/><text x="${p.l-6}" y="${y(v)+4}" text-anchor="end">${v.toFixed(Math.abs(hi-lo)<12?1:0)}</text>`}
+  labels.forEach((l,i)=>{if(i%4===0)g+=`<text x="${x(i)}" y="${H-8}" text-anchor="middle">${l.slice(0,7)}</text>`});
+  refs.forEach(v=>g+=`<line x1="${p.l}" x2="${W-p.r}" y1="${y(v)}" y2="${y(v)}" stroke="#81786b" stroke-dasharray="3 4" opacity=".7"/>`);
+  if(band){const u=S[band[0]].d,d=S[band[1]].d,idx=u.map((_,i)=>i).filter(i=>u[i]!=null&&d[i]!=null);
+    if(idx.length>1)g+=`<polygon fill="#6b7a4f" opacity=".13" points="${idx.map(i=>x(i)+','+y(u[i])).join(' ')} ${idx.slice().reverse().map(i=>x(i)+','+y(d[i])).join(' ')}"/>`}
+  S.forEach(s=>{let d='',pen=false;s.d.forEach((v,i)=>{if(v==null){pen=false;return}d+=(pen?'L':'M')+x(i).toFixed(1)+' '+y(v).toFixed(1);pen=true});
+    g+=`<path d="${d}" fill="none" stroke="${s.c}" stroke-width="${s.w||1.8}" ${s.dash?`stroke-dasharray="${s.dash}"`:''} stroke-linejoin="round"/>`});
+  el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img">${g}<line id="${id}v" y1="${p.t}" y2="${H-p.b}" stroke="#81786b" opacity="0"/></svg>
+  <div class="legend">${S.map(s=>`<span><i style="background:${s.c}"></i>${s.n}</span>`).join('')}</div><div class="tip"></div>`;
+  const svg=el.querySelector('svg'),tip=el.querySelector('.tip'),vl=svg.querySelector('line:last-child');
+  svg.onmousemove=e=>{const r=svg.getBoundingClientRect(),px=(e.clientX-r.left)/r.width*W;
+    const i=Math.max(0,Math.min(n-1,Math.round((px-p.l)/((W-p.l-p.r)/(n-1)))));
+    vl.setAttribute('x1',x(i));vl.setAttribute('x2',x(i));vl.setAttribute('opacity',.6);
+    tip.innerHTML=`<b>${labels[i].slice(0,7)}</b><br>`+S.map(s=>`${s.n}: ${f2(s.d[i])}`).join('<br>');
+    tip.style.display='block';const tx=e.clientX-el.getBoundingClientRect().left;
+    tip.style.left=(tx>el.clientWidth*.6?tx-tip.offsetWidth-12:tx+14)+'px';tip.style.top='14px'};
+  svg.onmouseleave=()=>{tip.style.display='none';vl.setAttribute('opacity',0)};
+}
+boot();
+</script>
+</body>
+</html>

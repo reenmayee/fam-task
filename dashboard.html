@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Daily to Monthly Stock Pipeline: Project Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#f3eee3;--card:#faf6ec;--ink:#2a2620;--muted:#6f6554;--rule:#ddd3bd;--moss:#4f6140;--bronze:#a06a2c;--rose:#9b6b6b;--slate:#5f7480;
+--serif:"Fraunces",Georgia,"Times New Roman",serif;--sans:"DM Sans",system-ui,-apple-system,"Segoe UI",sans-serif}
+*{box-sizing:border-box}html{background:var(--paper);scroll-behavior:smooth}
+body{margin:0;color:var(--ink);font:16px/1.65 var(--sans)}
+a{color:var(--moss);text-underline-offset:3px}
+:focus-visible{outline:2px solid var(--bronze);outline-offset:2px}
+.wrap{max-width:980px;margin:0 auto;padding:24px 20px 80px}
+nav{display:flex;gap:18px;flex-wrap:wrap;font-size:14px;padding-bottom:16px;border-bottom:1px solid var(--rule);color:var(--muted)}
+nav a{color:var(--muted)}
+h1{font:600 clamp(32px,5.6vw,50px)/1.1 var(--serif);letter-spacing:-.02em;margin:40px 0 12px;max-width:20ch}
+h2{font:600 27px/1.2 var(--serif);letter-spacing:-.01em;margin:68px 0 6px}
+h3{font:600 17px/1.3 var(--sans);margin:0 0 6px}
+p{margin:0 0 12px}.sub{color:var(--muted);max-width:68ch}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px;margin-top:18px}
+.box{background:var(--card);border:1px solid var(--rule);border-radius:6px;padding:18px}
+.box ul{margin:0;padding-left:18px}.box li{margin-bottom:6px}.box li::marker{color:var(--bronze)}
+.box.mid{border-color:var(--moss)}
+code{font:13.5px ui-monospace,Menlo,Consolas,monospace;background:#ece4d2;padding:1px 5px;border-radius:3px}
+.stats{display:flex;gap:34px;flex-wrap:wrap;margin:22px 0 4px;color:var(--muted);font-size:14px}
+.stats b{display:block;font:600 28px/1.1 var(--serif);color:var(--ink)}
+.flow{display:grid;gap:0;margin-top:18px;border-top:1px solid var(--rule);counter-reset:s}
+.flow div{padding:12px 0 12px 46px;border-bottom:1px solid var(--rule);position:relative;counter-increment:s}
+.flow div:before{content:counter(s);position:absolute;left:0;top:11px;width:28px;height:28px;border:1px solid var(--moss);color:var(--moss);border-radius:50%;text-align:center;line-height:26px;font-size:14px}
+.flow small{display:block;color:var(--muted);font-size:14px}
+.fn{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}
+button{font:inherit;font-size:14px;background:var(--card);color:var(--ink);border:1px solid var(--rule);border-radius:20px;padding:5px 14px;cursor:pointer}
+button:hover{border-color:var(--moss)}button[aria-pressed=true]{background:var(--moss);border-color:var(--moss);color:#fff}
+pre{margin:0;background:#2a2620;color:#efe8d8;border-radius:6px;padding:16px;overflow:auto;max-height:380px;font:13px/1.55 ui-monospace,Menlo,Consolas,monospace}
+.tick{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}
+.tick button{font-weight:500;padding:7px 18px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+label.c{display:inline-flex;gap:6px;align-items:center;border:1px solid var(--rule);border-radius:20px;padding:4px 12px;font-size:14px;cursor:pointer;background:var(--card)}
+label.c input{accent-color:var(--moss)}
+.say{background:var(--card);border-left:3px solid var(--bronze);padding:12px 16px;margin:14px 0;border-radius:0 6px 6px 0}
+.say p{margin:0 0 6px}.say p:last-child{margin:0}
+svg{display:block;width:100%;height:auto}svg text{font:12px var(--sans);fill:var(--muted)}
+.tw{overflow:auto;background:var(--card);border:1px solid var(--rule);border-radius:6px;max-height:420px}
+table{border-collapse:collapse;width:100%;font-size:13px;font-variant-numeric:tabular-nums}
+th,td{padding:7px 12px;text-align:right;white-space:nowrap}th:first-child,td:first-child{text-align:left}
+th{position:sticky;top:0;background:var(--card);color:var(--muted);font-weight:500;border-bottom:1px solid var(--rule)}
+tr+tr td{border-top:1px solid var(--rule)}
+.err{background:#f3dcd2;border:1px solid #c98f7a;border-radius:6px;padding:12px 16px;margin:14px 0;display:none}
+.mut{color:var(--muted);font-size:14px}
+</style></head><body><div class="wrap">
+<nav><a href="#given">The assignment</a><a href="#built">What I built</a><a href="#arch">Architecture</a><a href="#choices">Assumptions</a><a href="#explore">Explore the tickers</a></nav>
+
+<h1>Daily stock prices, turned into monthly insight</h1>
+<p class="sub">An end-to-end view of my data engineering assignment: what was asked, what I built, how the code is organised, and the real output for each stock. The code and the charts below are read live from the script and result files in this repo.</p>
+<div class="err" id="err"></div>
+<div class="stats" id="stats"></div>
+
+<h2 id="given">What the assignment gave me</h2>
+<div class="cols">
+<div class="box"><h3>Input</h3><ul>
+<li>One CSV of daily prices, 2 years, 10 stocks</li>
+<li>Columns: <code>date, volume, open, high, low, close, adjclose, ticker</code></li></ul></div>
+<div class="box"><h3>Asked for</h3><ul>
+<li>Resample daily data to monthly</li>
+<li>Open = first trading day, Close = last trading day, High = max, Low = min</li>
+<li>SMA 10 and 20, EMA 10 and 20, Donchian Channels, Bollinger Bands, Z-score on the monthly close</li></ul></div>
+<div class="box"><h3>Rules</h3><ul>
+<li>Python and Pandas only</li>
+<li>10 files named <code>result_{SYMBOL}.csv</code>, exactly 24 rows each</li>
+<li>Modular functions: calculation separate from file writing</li>
+<li>Assumptions written in the README</li></ul></div>
+</div>
+
+<h2 id="built">What I built and calculated</h2>
+<div class="cols">
+<div class="box mid"><h3>Monthly rows</h3><p class="mut">Each month keeps four numbers.</p><ul>
+<li><b>open</b>: first trading day</li><li><b>high</b>: highest of the month</li><li><b>low</b>: lowest of the month</li><li><b>close</b>: last trading day</li></ul></div>
+<div class="box mid"><h3>Trend indicators</h3><p class="mut">All on the monthly close.</p><ul>
+<li><b>SMA 10 / 20</b>: plain average of the last 10 or 20 closes</li>
+<li><b>EMA 10 / 20</b>: average that weights recent months more, starting from the SMA</li></ul></div>
+<div class="box mid"><h3>Range indicators</h3><ul>
+<li><b>Bollinger Bands</b>: 20-month average plus or minus 2 standard deviations</li>
+<li><b>Donchian Channel</b>: highest high and lowest low of 20 months</li>
+<li><b>Z-score</b>: how far the close is from its 20-month average, in standard deviations</li></ul></div>
+</div>
+
+<h2 id="arch">Architecture</h2>
+<p class="sub">The pipeline runs these steps in order. The function buttons and their code are read directly from the script.</p>
+<div class="flow">
+<div><b>Load and check the input</b><small><code>load_data</code>, <code>validate_input</code>, <code>validate_duplicates</code></small></div>
+<div><b>Clean</b><small><code>clean_data</code>: parse dates, sort by ticker and date</small></div>
+<div><b>Resample to monthly OHLC</b><small><code>aggregate_monthly</code></small></div>
+<div><b>Add indicators</b><small><code>sma_seeded_ema</code>, <code>calculate_indicators</code></small></div>
+<div><b>Check the monthly result</b><small><code>validate_monthly_output</code>: 24 rows, sorted, unique months</small></div>
+<div><b>Split by ticker and save</b><small><code>process_all_tickers</code>, <code>save_results</code></small></div>
+<div><b>Read the files back and check them</b><small><code>validate_saved_files</code></small></div>
+</div>
+<h3 style="margin-top:26px">Browse the code <span class="mut" id="src-note"></span></h3>
+<div class="fn" id="fns"></div>
+<pre id="code" tabindex="0">Pick a function above.</pre>
+
+<h2 id="choices">Choices and assumptions</h2>
+<div class="cols">
+<div class="box"><ul>
+<li><b>Window of 20 months</b> for Bollinger, Donchian and Z-score, since the brief gave none. Bollinger uses k = 2.</li>
+<li><b>Sample standard deviation</b> (Pandas default) for Bollinger and Z-score.</li></ul></div>
+<div class="box"><ul>
+<li><b>Empty cells are kept empty.</b> A 10-month average cannot exist before month 10, so early rows stay blank instead of being filled.</li>
+<li><b>EMA starts from the SMA</b>, as the reference formula suggests.</li></ul></div>
+<div class="box"><ul>
+<li><b>Strict checks.</b> The script stops if a ticker is missing or a stock does not give exactly 24 months.</li>
+<li><b>volume and adjclose</b> are not part of the required output, so they are not carried forward.</li></ul></div>
+</div>
+
+<h2 id="explore">Explore the output, ticker by ticker</h2>
+<p class="sub">These are the stocks found in the script. Click one to load its result file from the repo and see it as charts.</p>
+<div class="tick" id="tick"></div>
+<div id="panel"></div>
+</div>
+
+<script>
+// Only setting you may need to change: the name of the script in this repo.
+const SCRIPT = 'main.py';
+const FALLBACK = ['AAPL','AMD','AMZN','AVGO','CSCO','MSFT','NFLX','PEP','TMUS','TSLA'];
+const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const $ = s => document.querySelector(s);
+const E = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
+const err = m => { const b = $('#err'); b.style.display = 'block'; b.textContent = m; };
+const HELP = 'Could not read files from the repo. Open this page through GitHub Pages, or run "python -m http.server" in the project folder and visit localhost. Double-clicking the file does not work, because browsers block reading local files.';
+
+/* ---------- read main.py ---------- */
+function parseTickers(src) {
+  const m = src.match(/EXPECTED_TICKERS\s*=\s*\{([^}]*)\}/);
+  const t = m ? [...m[1].matchAll(/["']([A-Za-z.\-]+)["']/g)].map(x => x[1]).sort() : [];
+  return t.length ? t : FALLBACK;
+}
+function parseOutDir(src) {
+  const m = src.match(/OUTPUT_DIR\s*=\s*["']([^"']+)["']/);
+  return m ? m[1] : 'output';
+}
+function parseFunctions(src) {
+  const L = src.split('\n'), starts = [];
+  L.forEach((l, i) => { const m = l.match(/^def\s+(\w+)\s*\(/); if (m) starts.push([m[1], i]); });
+  return starts.map(([name, s], k) => {
+    let e = k + 1 < starts.length ? starts[k + 1][1] : L.length;
+    while (e > s && (L[e - 1].trim() === '' || L[e - 1].trim().startsWith('#'))) e--;
+    return { name, code: L.slice(s, e).join('\n') };
+  });
+}
+
+/* ---------- read a result file ---------- */
+function parseCSV(txt) {
+  const L = txt.trim().split(/\r?\n/), H = L[0].split(',');
+  return L.slice(1).map(l => { const p = l.split(','), o = {};
+    H.forEach((h, i) => { o[h] = (p[i] === '' || p[i] === undefined) ? null : (h === 'date' || h === 'ticker' ? p[i] : +p[i]); });
+    return o; });
+}
+const lab = d => MON[+d.slice(5, 7) - 1] + ' ' + d.slice(2, 4);
+
+/* ---------- tiny SVG charts ---------- */
+function chart(series, labels, o = {}) {
+  const W = 760, H = o.h || 300, L = 48, R = 74, T = 14, B = 30, n = labels.length;
+  const v = []; series.forEach(s => s.data.forEach(x => x != null && v.push(x)));
+  let lo = Math.min(...v), hi = Math.max(...v); const pad = (hi - lo) * .06 || 1; lo -= pad; hi += pad;
+  const X = i => L + i * (W - L - R) / (n - 1), Y = x => T + (hi - x) * (H - T - B) / (hi - lo);
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${o.label || 'chart'}">`;
+  for (let k = 0; k < 5; k++) { const g = lo + (hi - lo) * k / 4;
+    s += `<line x1="${L}" x2="${W - R}" y1="${Y(g)}" y2="${Y(g)}" stroke="#ddd3bd"/><text x="${L - 8}" y="${Y(g) + 4}" text-anchor="end">${g.toFixed(0)}</text>`; }
+  labels.forEach((l, i) => { if (i % 6 === 0 || i === n - 1) s += `<text x="${X(i)}" y="${H - 8}" text-anchor="middle">${l}</text>`; });
+  series.filter(a => a.band).forEach(a => { const ix = a.data.map((x, i) => x != null && a.band[i] != null ? i : -1).filter(i => i >= 0);
+    if (ix.length > 1) s += `<polygon points="${ix.map(i => X(i) + ',' + Y(a.data[i])).concat(ix.slice().reverse().map(i => X(i) + ',' + Y(a.band[i]))).join(' ')}" fill="${a.color}" fill-opacity=".14"/>`; });
+  series.forEach(a => { let d = '', up = false;
+    a.data.forEach((x, i) => { if (x == null) { up = false; return; } d += (up ? 'L' : 'M') + X(i).toFixed(1) + ',' + Y(x).toFixed(1); up = true; });
+    s += `<path d="${d}" fill="none" stroke="${a.color}" stroke-width="${a.w || 2}" ${a.dash ? 'stroke-dasharray="6 4"' : ''} stroke-linejoin="round"/>`;
+    if (a.dots) a.data.forEach((x, i) => { if (x != null) s += `<circle cx="${X(i)}" cy="${Y(x)}" r="3" fill="${a.color}"><title>${labels[i]}: ${x.toFixed(2)}</title></circle>`; });
+    let j = a.data.length - 1; while (j >= 0 && a.data[j] == null) j--;
+    if (j >= 0 && a.name) s += `<text x="${X(j) + 8}" y="${Y(a.data[j]) + 4}" style="fill:${a.color};font-weight:500">${a.name}</text>`; });
+  return s + '</svg>';
+}
+function bars(data, labels) {
+  const W = 760, H = 220, L = 48, R = 20, T = 14, B = 30, n = data.length;
+  const v = data.filter(x => x != null); const m = Math.max(3, ...v.map(Math.abs)) * 1.1;
+  const Y = x => T + (m - x) * (H - T - B) / (2 * m), bw = (W - L - R) / n;
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Z-score by month">`;
+  [-2, 0, 2].forEach(g => s += `<line x1="${L}" x2="${W - R}" y1="${Y(g)}" y2="${Y(g)}" stroke="#ddd3bd" ${g ? 'stroke-dasharray="4 4"' : ''}/><text x="${L - 8}" y="${Y(g) + 4}" text-anchor="end">${g}</text>`);
+  data.forEach((x, i) => { if (x == null) return; const c = Math.abs(x) > 2 ? '#a06a2c' : '#4f6140';
+    s += `<rect x="${L + i * bw + 4}" y="${Math.min(Y(0), Y(x))}" width="${bw - 8}" height="${Math.abs(Y(x) - Y(0))}" fill="${c}"><title>${labels[i]}: ${x.toFixed(2)}</title></rect>`; });
+  labels.forEach((l, i) => { if (i % 6 === 0 || i === n - 1) s += `<text x="${L + i * bw + bw / 2}" y="${H - 8}" text-anchor="middle">${l}</text>`; });
+  return s + '</svg>';
+}
+
+/* ---------- ticker panel ---------- */
+const cache = {}; let OUT = 'output';
+async function load(t) {
+  if (!cache[t]) { const r = await fetch(`${OUT}/result_${t}.csv`); if (!r.ok) throw new Error(t); cache[t] = parseCSV(await r.text()); }
+  return cache[t];
+}
+const f2 = x => x == null ? '–' : x.toFixed(2);
+async function show(t) {
+  document.querySelectorAll('#tick button').forEach(b => b.setAttribute('aria-pressed', b.textContent === t));
+  const P = $('#panel'); P.replaceChildren(E('p', 'mut', 'Loading ' + t + '…'));
+  let R; try { R = await load(t); } catch (e) { P.replaceChildren(); return err(`Could not load ${OUT}/result_${t}.csv. ${HELP}`); }
+  const labels = R.map(r => lab(r.date)), col = k => R.map(r => r[k]), last = R[R.length - 1], first = R[0];
+  const chg = (last.close / first.close - 1) * 100, z = last.Z_Score_20;
+  const say = E('div', 'say');
+  say.append(E('p', '', `${t} closed at ${f2(first.close)} in ${labels[0]} and ${f2(last.close)} in ${labels[labels.length - 1]}, a change of ${chg >= 0 ? '+' : ''}${chg.toFixed(1)}%.`));
+  if (last.SMA_10 != null) say.append(E('p', '', `The last close is ${last.close > last.SMA_10 ? 'above' : 'below'} its 10-month average (${f2(last.SMA_10)}) and ${last.close > last.EMA_10 ? 'above' : 'below'} its 10-month EMA (${f2(last.EMA_10)}), which usually points to an ${last.close > last.SMA_10 && last.close > last.EMA_10 ? 'uptrend' : last.close < last.SMA_10 && last.close < last.EMA_10 ? 'downtrend' : 'mixed trend'}.`));
+  if (z != null) say.append(E('p', '', `Its Z-score is ${z.toFixed(2)}: ${Math.abs(z) > 2 ? 'an unusual month, more than 2 standard deviations from its 20-month average' : 'within the normal range of about 2 standard deviations around its 20-month average'}.`));
+  const chips = E('div', 'chips'), opts = [['sma', 'SMA 10 and 20', 1], ['ema', 'EMA 10 and 20', 0], ['bb', 'Bollinger Bands', 0], ['dc', 'Donchian Channel', 0]];
+  const box1 = E('div', 'box'), draw = () => {
+    const on = k => chips.querySelector(`[data-k=${k}]`).checked, S = [];
+    if (on('bb')) S.push({ data: col('BB_Upper_20'), band: col('BB_Lower_20'), color: '#9b6b6b', w: 1 }, { data: col('BB_Lower_20'), color: '#9b6b6b', w: 1 });
+    if (on('dc')) S.push({ data: col('Donchian_High_20'), color: '#5f7480', dash: 1, w: 1.5 }, { data: col('Donchian_Low_20'), color: '#5f7480', dash: 1, w: 1.5 });
+    if (on('sma')) S.push({ data: col('SMA_10'), color: '#4f6140', name: 'SMA 10' }, { data: col('SMA_20'), color: '#7d9068', dash: 1, name: 'SMA 20' });
+    if (on('ema')) S.push({ data: col('EMA_10'), color: '#a06a2c', name: 'EMA 10' }, { data: col('EMA_20'), color: '#c7924f', dash: 1, name: 'EMA 20' });
+    S.push({ data: col('close'), color: '#2a2620', w: 2.6, dots: 1, name: 'Close' });
+    box1.innerHTML = chart(S, labels, { label: t + ' monthly close with indicators' }); };
+  opts.forEach(([k, n, c]) => { const l = E('label', 'c'), i = E('input'); i.type = 'checkbox'; i.dataset.k = k; i.checked = !!c; i.onchange = draw; l.append(i, n); chips.append(l); });
+  draw();
+  const box2 = E('div', 'box'); box2.innerHTML = bars(col('Z_Score_20'), labels);
+  const rows = R.map(r => `<tr><td>${lab(r.date)}</td>${['open', 'high', 'low', 'close', 'SMA_10', 'SMA_20', 'EMA_10', 'EMA_20', 'Donchian_High_20', 'Donchian_Low_20', 'BB_Middle_20', 'BB_Upper_20', 'BB_Lower_20', 'Z_Score_20'].map(k => `<td>${f2(r[k])}</td>`).join('')}</tr>`).join('');
+  const tw = E('div', 'tw'); tw.innerHTML = `<table><thead><tr><th>month</th>${['open', 'high', 'low', 'close', 'SMA 10', 'SMA 20', 'EMA 10', 'EMA 20', 'Don. high', 'Don. low', 'BB mid', 'BB upper', 'BB lower', 'Z-score'].map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table>`;
+  const h = (x, y) => { const d = E('div'); d.append(E('h3', '', x)); if (y) d.append(E('p', 'mut', y)); d.style.marginTop = '26px'; return d; };
+  P.replaceChildren(say, h('Monthly close and indicators', 'Switch indicators on or off. Hover a dot to see its value.'), chips, box1,
+    h('Z-score by month', 'Bars beyond the dashed lines (±2) are unusual months. It needs 20 months of history, so only the latest months appear.'), box2,
+    h('All ' + R.length + ' rows of result_' + t + '.csv', 'A dash means the value is empty because there are not enough earlier months yet.'), tw);
+}
+
+/* ---------- start ---------- */
+(async function () {
+  let src = '', tickers = FALLBACK;
+  try {
+    const r = await fetch(SCRIPT); if (!r.ok) throw 0; src = await r.text();
+    tickers = parseTickers(src); OUT = parseOutDir(src);
+    const fns = parseFunctions(src), box = $('#fns');
+    $('#src-note').textContent = `(read from ${SCRIPT})`;
+    fns.forEach(f => { const b = E('button', '', f.name); b.setAttribute('aria-pressed', 'false');
+      b.onclick = () => { box.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b)); $('#code').textContent = f.code; }; box.append(b); });
+    $('#stats').append(...[[fns.length, 'functions in ' + SCRIPT], [src.split('\n').length, 'lines of code'], [tickers.length, 'tickers found'], [24, 'rows per output file']]
+      .map(([n, l]) => { const d = E('div'); d.append(E('b', '', n), l); return d; }));
+  } catch (e) { err(`Could not read ${SCRIPT}. ${HELP}`); }
+  tickers.forEach(t => { const b = E('button', '', t); b.setAttribute('aria-pressed', 'false'); b.onclick = () => show(t); $('#tick').append(b); });
+})();
+</script></body></html>
